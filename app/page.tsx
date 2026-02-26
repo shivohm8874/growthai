@@ -1,7 +1,6 @@
 ﻿'use client'
 
-import { useState, useEffect } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { useState, useEffect, useRef } from 'react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -112,8 +111,127 @@ const integrationList = [
   { id: 'emailMarketing', name: 'Email Marketing', icon: 'mdi:email-newsletter', color: 'text-purple-400', description: 'Mailchimp, SendGrid, etc.' },
 ]
 
+const operationalActions = {
+  seo: [
+    'Crawling sitemap.xml for page inventory.',
+    'Checking canonical tags across indexed pages.',
+    'Verifying robots.txt directives.',
+    'Scanning meta descriptions for length compliance.',
+    'Analyzing heading hierarchy on target pages.',
+  ],
+  content: [
+    'Generating topic clusters for content planning.',
+    'Analyzing competitor content structure.',
+    'Identifying content gaps in current coverage.',
+    'Processing keyword density calculations.',
+    'Reviewing content freshness signals.',
+  ],
+  social: [
+    'Scheduling social post for distribution.',
+    'Analyzing optimal posting time windows.',
+    'Processing hashtag relevance scoring.',
+    'Reviewing engagement patterns on recent posts.',
+    'Checking character limits for platform compliance.',
+  ],
+  gmb: [
+    'Checking Google Business Profile status.',
+    'Reviewing business hours accuracy.',
+    'Processing business category optimization.',
+    'Analyzing review response queue.',
+    'Checking Q&A section for new inquiries.',
+  ],
+  monitoring: [
+    'Monitoring server response times.',
+    'Checking uptime status across monitored endpoints.',
+    'Processing error log patterns.',
+    'Analyzing traffic source distribution.',
+    'Reviewing conversion path signals.',
+  ],
+  email: [
+    'Processing email campaign queue.',
+    'Checking deliverability signals.',
+    'Analyzing open rate patterns.',
+    'Reviewing subject line variations.',
+    'Processing segment allocation.',
+  ],
+  technical: [
+    'Running database optimization routine.',
+    'Checking cache invalidation status.',
+    'Processing scheduled task queue.',
+    'Analyzing memory utilization patterns.',
+    'Reviewing API rate limit status.',
+  ],
+  competitors: [
+    'Scanning competitor content updates.',
+    'Analyzing competitor keyword targeting.',
+    'Reviewing competitor backlink acquisition.',
+    'Checking competitor social activity.',
+    'Processing competitor pricing signals.',
+  ],
+}
+
+function getRandomAction(category: keyof typeof operationalActions) {
+  const actions = operationalActions[category]
+  return actions[Math.floor(Math.random() * actions.length)]
+}
+
+function generateSystemStatus() {
+  return [
+    { label: 'Crawl Queue', value: Math.floor(Math.random() * 50) + 10, unit: 'pages' },
+    { label: 'Content Queue', value: Math.floor(Math.random() * 20) + 5, unit: 'items' },
+    { label: 'Social Queue', value: Math.floor(Math.random() * 30) + 8, unit: 'posts' },
+    { label: 'Monitor Alerts', value: Math.floor(Math.random() * 5), unit: 'active' },
+    { label: 'Tasks Running', value: Math.floor(Math.random() * 8) + 2, unit: 'parallel' },
+    { label: 'API Calls', value: Math.floor(Math.random() * 500) + 100, unit: '/hr' },
+  ]
+}
+
+function generateActiveModules() {
+  const modules = [
+    { name: 'SEO Crawler', icon: 'mdi:spider-web' },
+    { name: 'Content Engine', icon: 'mdi:file-document-edit' },
+    { name: 'Social Scheduler', icon: 'mdi:share-variant' },
+    { name: 'GMB Manager', icon: 'mdi:google-maps' },
+    { name: 'Analytics Monitor', icon: 'mdi:chart-line' },
+    { name: 'Email Automator', icon: 'mdi:email-fast' },
+    { name: 'Competitor Watch', icon: 'mdi:account-search' },
+    { name: 'Technical Auditor', icon: 'mdi:cog' },
+  ]
+  return modules.map(m => ({ ...m, lastActivity: Math.floor(Math.random() * 30) + 1 }))
+}
+
+function generateContextualAction(enabledIntegrations: string[]) {
+  const categories: (keyof typeof operationalActions)[] = ['seo', 'content', 'monitoring', 'technical', 'competitors']
+  if (enabledIntegrations.includes('gmb')) categories.push('gmb')
+  if (enabledIntegrations.some(i => ['facebook', 'instagram', 'twitter', 'linkedin'].includes(i))) categories.push('social')
+  if (enabledIntegrations.includes('emailMarketing')) categories.push('email')
+  const category = categories[Math.floor(Math.random() * categories.length)]
+  return { action: getRandomAction(category), category }
+}
+
+const focusMap: Record<string, string> = {
+  seo: 'SEO Crawler',
+  content: 'Content Engine',
+  social: 'Social Scheduler',
+  gmb: 'GMB Manager',
+  monitoring: 'Analytics Monitor',
+  email: 'Email Automator',
+  technical: 'Technical Auditor',
+  competitors: 'Competitor Watch',
+}
+
+function generateInitialLogs(enabledIntegrations: string[]): string[] {
+  const logs: string[] = []
+  for (let i = 0; i < 10; i++) {
+    const { action } = generateContextualAction(enabledIntegrations)
+    logs.push(action)
+  }
+  return logs
+}
+
 export default function Home() {
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [showDashboard, setShowDashboard] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState<FormData>(initialFormData)
   const [showAnalysis, setShowAnalysis] = useState(false)
@@ -121,6 +239,10 @@ export default function Home() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
   const [stepErrors, setStepErrors] = useState<string[]>([])
   const [acceptedTerms, setAcceptedTerms] = useState(false)
+
+  const clearStepErrors = () => {
+    setStepErrors(prev => (prev.length > 0 ? [] : prev))
+  }
 
   // Analysis simulation
   useEffect(() => {
@@ -138,13 +260,24 @@ export default function Home() {
     }
   }, [showAnalysis])
 
+  useEffect(() => {
+    if (showAnalysis && analysisProgress >= 100) {
+      const timeout = setTimeout(() => {
+        setShowAnalysis(false)
+        setShowOnboarding(false)
+        setShowDashboard(true)
+      }, 500)
+      return () => clearTimeout(timeout)
+    }
+  }, [showAnalysis, analysisProgress])
+
   const updateFormData = (field: string, value: unknown) => {
-    setStepErrors([])
+    clearStepErrors()
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   const updateIntegration = (integrationId: string, field: string, value: unknown) => {
-    setStepErrors([])
+    clearStepErrors()
     setFormData(prev => ({
       ...prev,
       integrations: {
@@ -158,7 +291,7 @@ export default function Home() {
   }
 
   const toggleGoal = (goalId: string) => {
-    setStepErrors([])
+    clearStepErrors()
     setFormData(prev => ({
       ...prev,
       selectedGoals: prev.selectedGoals.includes(goalId)
@@ -254,12 +387,14 @@ export default function Home() {
     if (currentStep < totalSteps) {
       goToStepIndex(currentStep + 1)
     } else {
+      setAnalysisProgress(0)
+      setShowDashboard(false)
       setShowAnalysis(true)
     }
   }
 
   const previousStep = () => {
-    setStepErrors([])
+    clearStepErrors()
     if (currentStep > 1) {
       goToStepIndex(currentStep - 1)
     }
@@ -500,6 +635,7 @@ export default function Home() {
   const OnboardingFlow = () => {
     const resetOnboarding = () => {
       setShowOnboarding(false)
+      setShowDashboard(false)
       setCurrentStep(1)
       setStepErrors([])
       setAcceptedTerms(false)
@@ -507,7 +643,7 @@ export default function Home() {
     }
 
     const enabledIntegrations = Object.entries(formData.integrations).filter(([, value]) => value.enabled)
-    const questionTitleClass = 'text-3xl md:text-4xl font-bold text-white tech-font tracking-wide'
+    const questionTitleClass = 'text-2xl md:text-4xl font-bold text-white tech-font tracking-wide leading-tight'
     const textMutedClass = 'text-sm text-gray-400'
     const inputClass = 'bg-white/5 border-white/20 text-white placeholder:text-gray-500 focus-visible:border-cyan-400 focus-visible:ring-cyan-400/30'
     const optionClass = (selected: boolean) =>
@@ -522,7 +658,7 @@ export default function Home() {
         return (
           <div className="space-y-4">
             <h2 className={questionTitleClass}>What is your business name?</h2>
-            <Input autoFocus className={inputClass} value={formData.businessName} onChange={(e) => updateFormData('businessName', e.target.value)} placeholder="e.g., Joe's Coffee Shop" />
+            <Input className={inputClass} value={formData.businessName} onChange={(e) => updateFormData('businessName', e.target.value)} placeholder="e.g., Joe's Coffee Shop" />
           </div>
         )
       }
@@ -572,7 +708,7 @@ export default function Home() {
         return (
           <div className="space-y-4">
             <h2 className={questionTitleClass}>Where is your business located?</h2>
-            <Input autoFocus className={inputClass} value={formData.businessLocation} onChange={(e) => updateFormData('businessLocation', e.target.value)} placeholder="e.g., New York, NY" />
+            <Input className={inputClass} value={formData.businessLocation} onChange={(e) => updateFormData('businessLocation', e.target.value)} placeholder="e.g., New York, NY" />
           </div>
         )
       }
@@ -581,7 +717,7 @@ export default function Home() {
           <div className="space-y-4">
             <h2 className={questionTitleClass}>Describe your business briefly</h2>
             <p className={textMutedClass}>Minimum 20 characters.</p>
-            <Textarea autoFocus rows={4} className={inputClass} value={formData.businessDescription} onChange={(e) => updateFormData('businessDescription', e.target.value)} placeholder="What you do, who you serve, and what makes you different." />
+            <Textarea rows={4} className={inputClass} value={formData.businessDescription} onChange={(e) => updateFormData('businessDescription', e.target.value)} placeholder="What you do, who you serve, and what makes you different." />
           </div>
         )
       }
@@ -604,7 +740,7 @@ export default function Home() {
         return (
           <div className="space-y-4">
             <h2 className={questionTitleClass}>How competitive is your market?</h2>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {['low', 'medium', 'high'].map((level) => (
                 <button key={level} type="button" onClick={() => updateFormData('competitionLevel', level)} className={`${optionClass(formData.competitionLevel === level)} capitalize p-4`}>
                   {level}
@@ -629,7 +765,7 @@ export default function Home() {
         return (
           <div className="space-y-4">
             <h2 className={questionTitleClass}>What is your website URL?</h2>
-            <Input autoFocus className={inputClass} type="url" value={formData.websiteUrl} onChange={(e) => updateFormData('websiteUrl', e.target.value)} placeholder="https://example.com" />
+            <Input className={inputClass} type="url" value={formData.websiteUrl} onChange={(e) => updateFormData('websiteUrl', e.target.value)} placeholder="https://example.com" />
           </div>
         )
       }
@@ -679,7 +815,7 @@ export default function Home() {
         return (
           <div className="space-y-4">
             <h2 className={questionTitleClass}>Who is your hosting provider?</h2>
-            <Input autoFocus className={inputClass} value={formData.hostingProvider} onChange={(e) => updateFormData('hostingProvider', e.target.value)} placeholder="e.g., Bluehost, SiteGround, AWS" />
+            <Input className={inputClass} value={formData.hostingProvider} onChange={(e) => updateFormData('hostingProvider', e.target.value)} placeholder="e.g., Bluehost, SiteGround, AWS" />
           </div>
         )
       }
@@ -712,7 +848,7 @@ export default function Home() {
             <div><span className="text-gray-500">Integrations:</span> <span className="font-medium text-white">{enabledIntegrations.length > 0 ? enabledIntegrations.map(([id]) => integrationList.find((x) => x.id === id)?.name || id).join(', ') : 'None selected'}</span></div>
           </div>
           <label className="flex items-start gap-3 rounded-xl border border-cyan-500/30 bg-cyan-500/10 p-4 cursor-pointer">
-            <Checkbox checked={acceptedTerms} onCheckedChange={(checked) => { setAcceptedTerms(checked === true); setStepErrors([]) }} className="mt-0.5" />
+            <Checkbox checked={acceptedTerms} onCheckedChange={(checked) => { setAcceptedTerms(checked === true); clearStepErrors() }} className="mt-0.5" />
             <span className="text-sm text-gray-200">I confirm the details are accurate and consent to use this data for onboarding and strategy generation.</span>
           </label>
         </div>
@@ -723,13 +859,13 @@ export default function Home() {
       return (
         <div className="fixed inset-0 z-50 bg-[#030305] overflow-y-auto">
           <div className="bg-[#030305]/90 border-b border-white/10 sticky top-0 z-10 backdrop-blur-md">
-            <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div className="max-w-3xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 border border-cyan-400/40 rounded-xl flex items-center justify-center bg-cyan-500/10">
                   <span className="iconify text-cyan-300 text-xl" data-icon="mdi:rocket-launch" />
                 </div>
                 <div>
-                  <div className="text-2xl font-extrabold text-white tech-font tracking-wider">GrowthAI</div>
+                  <div className="text-xl md:text-2xl font-extrabold text-white tech-font tracking-wider">GrowthAI</div>
                   <div className="text-xs text-gray-400 uppercase tracking-widest">Step {currentStep} of {totalSteps}</div>
                 </div>
               </div>
@@ -739,17 +875,12 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="max-w-3xl mx-auto px-6 py-6">
+          <div className="max-w-3xl mx-auto px-4 md:px-6 py-5 md:py-6">
             <Progress value={progressPercent} className="h-1.5 bg-white/10 [&_[data-slot=progress-indicator]]:bg-cyan-400" />
           </div>
 
-          <div className="max-w-3xl mx-auto px-6 pb-12">
-            <motion.div
-              initial={{ opacity: 0, y: 18, scale: 0.985 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.35, ease: 'easeOut' }}
-              className="rounded-2xl shadow-2xl border border-white/10 bg-[#0a0a0d] text-white p-8"
-            >
+          <div className="max-w-3xl mx-auto px-4 md:px-6 pb-10 md:pb-12">
+            <div className="rounded-2xl shadow-2xl border border-white/10 bg-[#0a0a0d] text-white p-5 md:p-8">
               <div className="text-xs uppercase tracking-widest text-cyan-300 mb-6 tech-font">{activeStep?.label}</div>
 
               {stepErrors.length > 0 && (
@@ -766,34 +897,246 @@ export default function Home() {
                 </Alert>
               )}
 
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={currentStepId}
-                  initial={{ opacity: 0, y: 12, filter: 'blur(6px)' }}
-                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                  exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }}
-                  transition={{ duration: 0.24, ease: 'easeOut' }}
-                >
-                  {renderStepContent()}
-                </motion.div>
-              </AnimatePresence>
+              <div>{renderStepContent()}</div>
 
-              <div className="flex justify-between mt-10 pt-6 border-t border-white/10">
-                <Button onClick={previousStep} disabled={currentStep === 1} variant="outline" className="px-6 border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white">
+              <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-between mt-8 md:mt-10 pt-5 md:pt-6 border-t border-white/10">
+                <Button onClick={previousStep} disabled={currentStep === 1} variant="outline" className="w-full sm:w-auto px-6 border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white">
                   Back
                 </Button>
-                <Button onClick={nextStep} className="px-8 flex items-center gap-2 bg-cyan-400 text-black hover:bg-cyan-300 tech-font uppercase tracking-wider">
+                <Button onClick={nextStep} className="w-full sm:w-auto px-8 flex items-center gap-2 justify-center bg-cyan-400 text-black hover:bg-cyan-300 tech-font uppercase tracking-wider">
                   {currentStep === totalSteps ? 'Start AI Analysis' : 'Continue'}
                   <span className="iconify" data-icon="mdi:arrow-right" />
                 </Button>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       )
     }
 
     return null
+  }
+
+  const SimulationDashboard = () => {
+    const enabledIntegrations = Object.entries(formData.integrations)
+      .filter(([, value]) => value.enabled)
+      .map(([key]) => key)
+    const effectiveIntegrations = ['seo', ...enabledIntegrations]
+
+    const [operationLog, setOperationLog] = useState<string[]>(() => generateInitialLogs(effectiveIntegrations))
+    const [systemStatus, setSystemStatus] = useState(() => generateSystemStatus())
+    const [activeModules, setActiveModules] = useState(() => generateActiveModules())
+    const [currentFocus, setCurrentFocus] = useState<string>('SEO Crawler')
+    const [cycleCount, setCycleCount] = useState(0)
+    const logEndRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        const { action, category } = generateContextualAction(effectiveIntegrations)
+        setOperationLog(prev => {
+          const next = [...prev, action]
+          if (next.length > 150) next.shift()
+          return next
+        })
+        setCurrentFocus(focusMap[category] || 'System')
+        setCycleCount(prev => prev + 1)
+      }, Math.random() * 1500 + 1000)
+      return () => clearInterval(interval)
+    }, [effectiveIntegrations.join(',')])
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setSystemStatus(generateSystemStatus())
+        setActiveModules(generateActiveModules())
+      }, 5000)
+      return () => clearInterval(interval)
+    }, [])
+
+    useEffect(() => {
+      logEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, [operationLog])
+
+    const connectedServices = integrationList.filter((service) =>
+      enabledIntegrations.includes(service.id)
+    )
+
+    return (
+      <div className="min-h-screen bg-[#030305] text-gray-300">
+        <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-[#030305]/95 backdrop-blur-md">
+          <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 flex justify-between items-center gap-3">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-white rotate-45 transform" />
+              <span className="text-lg font-bold text-white tracking-widest tech-font">GROWTHAI</span>
+              <span className="hidden md:inline text-xs text-cyan-400 uppercase tracking-wider ml-2">Operations Active</span>
+            </div>
+            <div className="flex items-center gap-3 md:gap-6">
+              <div className="hidden sm:block text-xs text-gray-500 font-mono">
+                Cycle: <span className="text-cyan-400">{cycleCount.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-xs text-green-400">System Running</span>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <div className="pt-16 min-h-screen flex flex-col xl:flex-row">
+          <aside className="order-2 xl:order-1 w-full xl:w-64 border-t xl:border-t-0 xl:border-r border-white/5 p-4 flex-shrink-0 bg-[#040406] xl:bg-transparent">
+            <div className="mb-6">
+              <h3 className="text-xs uppercase tracking-widest text-gray-500 mb-3 tech-font">System Status</h3>
+              <div className="space-y-3">
+                {systemStatus.map((stat, i) => (
+                  <div key={i} className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">{stat.label}</span>
+                    <span className="text-xs text-cyan-400 font-mono">{stat.value} <span className="text-gray-500">{stat.unit}</span></span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-xs uppercase tracking-widest text-gray-500 mb-3 tech-font">Active Modules</h3>
+              <div className="space-y-2">
+                {activeModules.map((module, i) => (
+                  <div key={i} className={`flex items-center gap-2 p-2 rounded-lg border transition ${currentFocus === module.name ? 'bg-cyan-500/10 border-cyan-500/40' : 'bg-white/5 border-white/5 hover:border-white/15'}`}>
+                    <span className={`iconify text-sm ${currentFocus === module.name ? 'text-cyan-400' : 'text-gray-500'}`} data-icon={module.icon} />
+                    <span className={`text-xs flex-1 ${currentFocus === module.name ? 'text-white' : 'text-gray-400'}`}>{module.name}</span>
+                    <span className="text-[10px] text-gray-600">{module.lastActivity}s</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-xs uppercase tracking-widest text-gray-500 mb-3 tech-font">Connected Services</h3>
+              <div className="space-y-1">
+                {connectedServices.length > 0 ? connectedServices.map((service, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs text-gray-400">
+                    <span className={`iconify ${service.color}`} data-icon={service.icon} />
+                    <span>{service.name}</span>
+                  </div>
+                )) : <div className="text-xs text-gray-500">No connected services selected.</div>}
+              </div>
+            </div>
+          </aside>
+
+          <main className="order-1 xl:order-2 flex-1 flex flex-col min-h-[50vh] xl:min-h-0">
+            <div className="border-b border-white/5 p-3 md:p-4 bg-[#050507]">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-cyan-500 rounded-full animate-ping" />
+                <span className="text-xs uppercase tracking-widest text-gray-500 tech-font">Currently Processing</span>
+                <span className="text-sm text-white font-medium">{currentFocus}</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 md:p-4 border-b border-white/5 bg-[#040406]">
+              {[
+                { label: 'Agent State', value: 'Autonomous' },
+                { label: 'Primary Mode', value: 'Execution' },
+                { label: 'Queue Health', value: 'Stable' },
+                { label: 'Signal Feed', value: 'Live' },
+              ].map((item) => (
+                <div key={item.label} className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
+                  <div className="text-[10px] uppercase tracking-wider text-gray-500">{item.label}</div>
+                  <div className="text-xs md:text-sm text-cyan-300 tech-font mt-0.5">{item.value}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex-1 overflow-hidden relative h-[52vh] md:h-[60vh] xl:h-auto">
+              <div className="absolute inset-0 overflow-y-auto p-4 md:p-6 font-mono text-xs md:text-sm leading-relaxed">
+                {operationLog.map((log, i) => (
+                  <div key={i} className={`py-1 border-l-2 pl-4 mb-1 transition-all duration-300 ${
+                    i === operationLog.length - 1
+                      ? 'border-cyan-500 text-white bg-cyan-500/5'
+                      : i === operationLog.length - 2
+                      ? 'border-cyan-500/50 text-gray-300'
+                      : 'border-transparent text-gray-500'
+                  }`}>
+                    {log}
+                  </div>
+                ))}
+                <div ref={logEndRef} className="h-4" />
+              </div>
+              <div className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent animate-scan" />
+            </div>
+          </main>
+
+          <aside className="order-3 w-full xl:w-80 border-t xl:border-t-0 xl:border-l border-white/5 p-4 flex-shrink-0 bg-[#040406] xl:bg-transparent">
+            <div className="mb-6 p-4 bg-white/5 rounded-lg">
+              <h3 className="text-xs uppercase tracking-widest text-gray-500 mb-3 tech-font">Target Property</h3>
+              <div className="text-sm text-white mb-2">{formData.businessName || 'Demo Business'}</div>
+              <div className="text-xs text-gray-500">{formData.websiteUrl || 'https://example.com'}</div>
+              <div className="text-xs text-gray-600 mt-1">{formData.businessCategory || 'General'}</div>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-xs uppercase tracking-widest text-gray-500 mb-3 tech-font">Parallel Threads</h3>
+              <div className="space-y-2">
+                {[
+                  { name: 'Primary Crawler', status: 'crawling' },
+                  { name: 'Content Processor', status: 'generating' },
+                  { name: 'Social Distributor', status: 'posting' },
+                  { name: 'Monitor Service', status: 'watching' },
+                ].map((thread, i) => (
+                  <div key={i} className="flex items-center gap-2 p-2 bg-white/5 rounded border border-white/10">
+                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                    <span className="text-xs text-gray-400 flex-1">{thread.name}</span>
+                    <span className="text-[10px] text-cyan-400 font-mono">{thread.status}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-xs uppercase tracking-widest text-gray-500 mb-3 tech-font">Resource Allocation</h3>
+              <div className="space-y-3">
+                {[
+                  { label: 'Crawl Budget', value: 67 },
+                  { label: 'API Quota', value: 45 },
+                  { label: 'Queue Depth', value: 23 },
+                  { label: 'Memory', value: 34 },
+                ].map((resource, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-gray-500">{resource.label}</span>
+                      <span className="text-gray-400">{resource.value}%</span>
+                    </div>
+                    <div className="h-1 bg-gray-800 rounded overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded transition-all duration-500" style={{ width: `${resource.value}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-xs uppercase tracking-widest text-gray-500 mb-3 tech-font">Observations</h3>
+              <div className="space-y-2 text-xs text-gray-500">
+                <div className="p-2 bg-white/5 rounded border border-cyan-500/30">Website structure mapped.</div>
+                <div className="p-2 bg-white/5 rounded border border-green-500/30">CMS detected: {formData.cmsType || 'Unknown'}.</div>
+                <div className="p-2 bg-white/5 rounded border border-blue-500/30">Sitemap available for processing.</div>
+                <div className="p-2 bg-white/5 rounded border border-purple-500/30">Integration pipelines initialized.</div>
+                <div className="p-2 bg-white/5 rounded border border-yellow-500/30">Priority channels active.</div>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <style jsx>{`
+          @keyframes scan {
+            0% { top: 0%; opacity: 0; }
+            5% { opacity: 1; }
+            95% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+          }
+          .animate-scan {
+            animation: scan 8s linear infinite;
+          }
+        `}</style>
+      </div>
+    )
   }
 
   // Analysis Modal
@@ -855,10 +1198,10 @@ export default function Home() {
 
   return (
     <>
-      {!showOnboarding && <LandingPage />}
-      {showOnboarding && <OnboardingFlow />}
-      {showAnalysis && <AnalysisModal />}
+      {!showOnboarding && !showDashboard && LandingPage()}
+      {showOnboarding && OnboardingFlow()}
+      {showAnalysis && AnalysisModal()}
+      {showDashboard && <SimulationDashboard />}
     </>
   )
 }
-
