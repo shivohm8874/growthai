@@ -43,6 +43,53 @@ interface FormData {
   }
 }
 
+interface Activity {
+  id: string
+  module: string
+  action: string
+  status: 'running' | 'success' | 'warning' | 'error'
+  timestamp: number
+  details?: string
+}
+
+interface Keyword {
+  term: string
+  position: number
+  change: number
+  volume: string
+  difficulty: string
+  status: 'improving' | 'declining' | 'stable'
+}
+
+interface Backlink {
+  domain: string
+  url: string
+  da: number
+  status: 'new' | 'lost' | 'active'
+  type: 'dofollow' | 'nofollow'
+}
+
+interface SitePage {
+  url: string
+  title: string
+  issues: number
+  score: number
+  lastCrawled: string
+}
+
+interface SocialPost {
+  platform: string
+  content: string
+  scheduled: string
+  status: 'queued' | 'posting' | 'posted' | 'failed'
+}
+
+interface GMBUpdate {
+  type: string
+  content: string
+  status: 'pending' | 'syncing' | 'synced'
+}
+
 const initialFormData: FormData = {
   businessName: '',
   businessCategory: '',
@@ -110,6 +157,79 @@ const integrationList = [
   { id: 'linkedin', name: 'LinkedIn', icon: 'mdi:linkedin', color: 'text-blue-600', description: 'B2B networking' },
   { id: 'emailMarketing', name: 'Email Marketing', icon: 'mdi:email-newsletter', color: 'text-purple-400', description: 'Mailchimp, SendGrid, etc.' },
 ]
+
+const keywordSeed: Keyword[] = [
+  { term: 'best coffee shop near me', position: 3, change: 2, volume: '12.3K', difficulty: 'medium', status: 'improving' },
+  { term: 'artisanal coffee downtown', position: 1, change: 0, volume: '2.4K', difficulty: 'low', status: 'stable' },
+  { term: 'organic coffee beans', position: 7, change: -2, volume: '8.1K', difficulty: 'high', status: 'declining' },
+  { term: 'specialty espresso drinks', position: 2, change: 3, volume: '4.2K', difficulty: 'medium', status: 'improving' },
+  { term: 'local coffee roasters', position: 4, change: 1, volume: '3.8K', difficulty: 'low', status: 'improving' },
+  { term: 'breakfast cafe menu', position: 5, change: -1, volume: '6.5K', difficulty: 'medium', status: 'declining' },
+  { term: 'coffee subscription service', position: 12, change: 4, volume: '1.9K', difficulty: 'high', status: 'improving' },
+  { term: 'pour over coffee guide', position: 8, change: 0, volume: '5.1K', difficulty: 'medium', status: 'stable' },
+]
+
+const moduleSeed = [
+  { name: 'SEO Crawler', icon: 'mdi:spider-web', color: 'cyan', active: true },
+  { name: 'Rank Tracker', icon: 'mdi:chart-line-variant', color: 'green', active: true },
+  { name: 'Backlink Monitor', icon: 'mdi:link-variant', color: 'blue', active: true },
+  { name: 'Content Optimizer', icon: 'mdi:file-document-edit', color: 'purple', active: true },
+  { name: 'Social Scheduler', icon: 'mdi:share-variant', color: 'pink', active: true },
+  { name: 'GMB Manager', icon: 'mdi:google-maps', color: 'red', active: true },
+  { name: 'Competitor Watch', icon: 'mdi:account-search', color: 'orange', active: true },
+  { name: 'Email Automator', icon: 'mdi:email-fast', color: 'yellow', active: true },
+] as const
+
+const activityTemplates = {
+  seo: [
+    { action: 'Crawling page', details: '/products/organic-coffee-blend' },
+    { action: 'Analyzing meta tags', details: '15 pages processed' },
+    { action: 'Checking canonical URLs', details: '3 duplicates found' },
+  ],
+  rank: [
+    { action: 'Checking SERP position', details: 'best coffee shop near me → #3' },
+    { action: 'Tracking keyword movement', details: '+2 positions gained' },
+    { action: 'Analyzing SERP features', details: 'Featured snippet detected' },
+  ],
+  backlink: [
+    { action: 'Discovering new backlinks', details: '23 new links found' },
+    { action: 'Analyzing link quality', details: 'DA distribution calculated' },
+    { action: 'Checking anchor text', details: 'Diversity score: 78%' },
+  ],
+  content: [
+    { action: 'Generating content brief', details: 'Topic: coffee brewing guide' },
+    { action: 'Analyzing content gaps', details: '12 opportunities found' },
+    { action: 'Optimizing keyword density', details: 'Target: 1.5-2%' },
+  ],
+  social: [
+    { action: 'Scheduling post', details: 'Facebook - 2:30 PM EST' },
+    { action: 'Optimizing hashtags', details: '25 hashtags generated' },
+    { action: 'Cross-posting content', details: 'Instagram → Facebook' },
+  ],
+  gmb: [
+    { action: 'Syncing business hours', details: 'Holiday hours updated' },
+    { action: 'Uploading photos', details: '8 new photos added' },
+    { action: 'Responding to reviews', details: '5 responses sent' },
+  ],
+  competitor: [
+    { action: 'Scanning competitor site', details: 'competitor-a.com analyzed' },
+    { action: 'Tracking keyword gaps', details: '8 keyword opportunities' },
+    { action: 'Analyzing backlink gap', details: '45 linking domains missed' },
+  ],
+  email: [
+    { action: 'Processing campaign', details: 'Newsletter #47 sending' },
+    { action: 'Segmenting audience', details: '1,234 contacts matched' },
+    { action: 'A/B testing subject', details: 'Variant B winning +18%' },
+  ],
+}
+
+function generateId() {
+  return Math.random().toString(36).substring(2, 9)
+}
+
+function getRandomItem<T>(arr: readonly T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)]
+}
 
 const operationalActions = {
   seo: [
@@ -407,7 +527,7 @@ export default function Home() {
       
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-[#030305]/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-white rotate-45 transform" />
             <span className="text-xl font-bold text-white tracking-widest tech-font">GROWTHAI</span>
@@ -420,7 +540,7 @@ export default function Home() {
           <div>
             <button 
               onClick={() => setShowOnboarding(true)}
-              className="border border-white/20 text-white text-xs px-6 py-2 uppercase tracking-widest hover:bg-white hover:text-black transition-all tech-font"
+              className="border border-white/20 text-white text-[10px] md:text-xs px-3 md:px-6 py-2 uppercase tracking-widest hover:bg-white hover:text-black transition-all tech-font"
             >
               Access Terminal
             </button>
@@ -429,38 +549,38 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center pt-24 md:pt-20 pb-10 md:pb-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-900/10 to-transparent opacity-50" />
         
-        <div className="relative z-10 grid md:grid-cols-2 gap-12 max-w-7xl mx-auto px-6 items-center">
+        <div className="relative z-10 grid md:grid-cols-2 gap-8 md:gap-12 max-w-7xl mx-auto px-4 md:px-6 items-center">
           <div>
             <div className="flex items-center space-x-2 mb-4 text-xs tracking-widest text-cyan-400 uppercase">
               <span className="w-2 h-2 bg-cyan-400 rounded-full animate-ping" />
               <span>System Status: Online</span>
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-bold text-white leading-none mb-6 glitch-text tech-font" data-text="AUTONOMOUS GROWTH">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-white leading-none mb-6 glitch-text tech-font" data-text="AUTONOMOUS GROWTH">
               AUTONOMOUS<br />GROWTH
             </h1>
             
-            <p className="text-gray-400 text-lg mb-8 max-w-md border-l-2 border-cyan-500/50 pl-4">
+            <p className="text-gray-400 text-base md:text-lg mb-8 max-w-md border-l-2 border-cyan-500/50 pl-4">
               Shifting human operations to machine precision. One engine for SEO, SMO, GMB, Web Dev, CRO &amp; Content.
             </p>
 
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4">
               <button 
                 onClick={() => setShowOnboarding(true)}
-                className="bg-white text-black px-8 py-3 font-bold uppercase tracking-widest text-sm hover:bg-cyan-400 transition-all tech-font shadow-lg shadow-white/10"
+                className="w-full sm:w-auto bg-white text-black px-8 py-3 font-bold uppercase tracking-widest text-sm hover:bg-cyan-400 transition-all tech-font shadow-lg shadow-white/10"
               >
                 Initialize Engine
               </button>
-              <button className="border border-white/30 text-white px-8 py-3 uppercase tracking-widest text-sm hover:bg-white/5 transition-all tech-font">
+              <button className="w-full sm:w-auto border border-white/30 text-white px-8 py-3 uppercase tracking-widest text-sm hover:bg-white/5 transition-all tech-font">
                 View Specs
               </button>
             </div>
           </div>
 
-          <div className="relative h-[500px] flex items-center justify-center">
+          <div className="relative h-[320px] sm:h-[420px] md:h-[500px] flex items-center justify-center">
             <div className="orbit-system absolute">
               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-cyan-400">
                 <span className="iconify" data-icon="mdi:robot-industrial" data-width="24" />
@@ -491,14 +611,14 @@ export default function Home() {
       </section>
 
       {/* Capabilities Section */}
-      <section id="systems" className="py-24 relative">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
+      <section id="systems" className="py-16 md:py-24 relative">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="text-center mb-10 md:mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white tech-font mb-2">SYSTEM MODULES</h2>
             <p className="text-gray-500 text-sm uppercase tracking-widest">All-in-one Automation Architecture</p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 md:gap-1">
             {[
               { icon: 'mdi:magnify', title: 'SEO & Semantics', desc: 'Autonomous Crawling & Ranking', color: 'cyan' },
               { icon: 'mdi:share-variant', title: 'SMO Engine', desc: 'Social Synthesis & Posting', color: 'purple' },
@@ -525,8 +645,8 @@ export default function Home() {
       </section>
 
       {/* Pricing Section */}
-      <section id="velocity" className="py-24 bg-[#050507]">
-        <div className="max-w-6xl mx-auto px-6">
+      <section id="velocity" className="py-16 md:py-24 bg-[#050507]">
+        <div className="max-w-6xl mx-auto px-4 md:px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white tech-font mb-2">SELECT COMPUTE VELOCITY</h2>
             <p className="text-gray-500 text-sm max-w-2xl mx-auto tracking-wide">
@@ -534,7 +654,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               { name: 'Starter', icon: 'mdi:chip', price: '$99', speed: '1x Standard', percent: 20, featured: false, features: ['Standard AI Language Model', 'Linear Content Processing', 'Basic SEO keyword matching'] },
               { name: 'Professional', icon: 'mdi:server', price: '$199', speed: '5x Hyper-Velocity', percent: 60, featured: true, features: ['ProModel X1 Neural Engine (5x Faster)', 'Hyperscale Distributed Crawlers', 'Multi-threaded Semantic Synthesis', 'Real-time SERP Volatility Analysis'] },
@@ -543,7 +663,7 @@ export default function Home() {
               <div
                 key={index}
                 className={`border bg-[#0a0a0a] p-6 flex flex-col transition-all ${
-                  plan.featured ? 'border-cyan-500/50 shadow-lg shadow-cyan-500/10 md:-translate-y-4 relative' : 'border-white/10 hover:border-white/30'
+                  plan.featured ? 'border-cyan-500/50 shadow-lg shadow-cyan-500/10 lg:-translate-y-4 relative' : 'border-white/10 hover:border-white/30'
                 }`}
               >
                 {plan.featured && (
@@ -596,7 +716,7 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="mt-16 max-w-3xl mx-auto border-t border-white/10 pt-8">
+          <div className="mt-12 md:mt-16 max-w-3xl mx-auto border-t border-white/10 pt-8">
             <h3 className="text-xl text-white tech-font mb-6 text-center">Technical Specifications</h3>
             {[
               { q: 'What is the ProModel X1 Engine?', a: 'The ProModel X1 is our proprietary neural architecture designed specifically for high-volume text generation. It utilizes a mixture-of-experts (MoE) approach to deliver 5x faster inference speeds.' },
@@ -618,7 +738,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-white/10 py-12 bg-[#030305]">
-        <div className="max-w-7xl mx-auto px-6 text-center">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 text-center">
           <div className="flex justify-center items-center space-x-3 mb-6">
             <div className="w-6 h-6 bg-white rotate-45 transform" />
             <span className="text-lg font-bold text-white tracking-widest tech-font">GROWTHAI</span>
@@ -918,223 +1038,336 @@ export default function Home() {
   }
 
   const SimulationDashboard = () => {
-    const enabledIntegrations = Object.entries(formData.integrations)
-      .filter(([, value]) => value.enabled)
-      .map(([key]) => key)
-    const effectiveIntegrations = ['seo', ...enabledIntegrations]
-
-    const [operationLog, setOperationLog] = useState<string[]>(() => generateInitialLogs(effectiveIntegrations))
-    const [systemStatus, setSystemStatus] = useState(() => generateSystemStatus())
-    const [activeModules, setActiveModules] = useState(() => generateActiveModules())
-    const [currentFocus, setCurrentFocus] = useState<string>('SEO Crawler')
+    const [activities, setActivities] = useState<Activity[]>([])
+    const [keywordData, setKeywordData] = useState<Keyword[]>(keywordSeed)
+    const [backlinks, setBacklinks] = useState<Backlink[]>([])
+    const [pages, setPages] = useState<SitePage[]>([])
+    const [socialQueue, setSocialQueue] = useState<SocialPost[]>([])
+    const [gmbUpdates, setGmbUpdates] = useState<GMBUpdate[]>([])
+    const [moduleStats, setModuleStats] = useState<Record<string, { tasks: number; success: number; errors: number }>>({})
     const [cycleCount, setCycleCount] = useState(0)
-    const logEndRef = useRef<HTMLDivElement>(null)
+    const [activeUsers, setActiveUsers] = useState(0)
+    const [apiCalls, setApiCalls] = useState(0)
 
     useEffect(() => {
-      const interval = setInterval(() => {
-        const { action, category } = generateContextualAction(effectiveIntegrations)
-        setOperationLog(prev => {
-          const next = [...prev, action]
-          if (next.length > 150) next.shift()
-          return next
+      setBacklinks([
+        { domain: 'coffeeblog.com', url: '/best-shops-2024', da: 45, status: 'active', type: 'dofollow' },
+        { domain: 'foodnetwork.com', url: '/local-favorites', da: 78, status: 'active', type: 'dofollow' },
+        { domain: 'yelp.com', url: '/biz/reviews', da: 92, status: 'active', type: 'nofollow' },
+        { domain: 'tripadvisor.com', url: '/restaurant-guide', da: 88, status: 'new', type: 'dofollow' },
+        { domain: 'old-blog.com', url: '/archived-post', da: 32, status: 'lost', type: 'dofollow' },
+      ])
+
+      setPages([
+        { url: '/', title: 'Homepage', issues: 2, score: 94, lastCrawled: '2m ago' },
+        { url: '/menu', title: 'Our Menu', issues: 5, score: 78, lastCrawled: '5m ago' },
+        { url: '/about', title: 'About Us', issues: 1, score: 89, lastCrawled: '8m ago' },
+        { url: '/products', title: 'Products', issues: 8, score: 65, lastCrawled: '12m ago' },
+        { url: '/contact', title: 'Contact', issues: 0, score: 96, lastCrawled: '15m ago' },
+      ])
+
+      setSocialQueue([
+        { platform: 'facebook', content: 'Start your morning right with our new...', scheduled: '2:30 PM', status: 'queued' },
+        { platform: 'instagram', content: 'Behind the scenes: How we roast our...', scheduled: '4:00 PM', status: 'queued' },
+        { platform: 'twitter', content: 'Flash sale! 20% off all cold brew...', scheduled: '12:00 PM', status: 'posting' },
+      ])
+
+      setGmbUpdates([
+        { type: 'Post', content: 'Weekly Special: Free pastry with...', status: 'synced' },
+        { type: 'Photo', content: 'Interior shot uploaded', status: 'syncing' },
+        { type: 'Hours', content: 'Updated holiday hours', status: 'pending' },
+      ])
+
+      setModuleStats({
+        'SEO Crawler': { tasks: 847, success: 831, errors: 16 },
+        'Rank Tracker': { tasks: 234, success: 234, errors: 0 },
+        'Backlink Monitor': { tasks: 156, success: 151, errors: 5 },
+        'Content Optimizer': { tasks: 89, success: 87, errors: 2 },
+        'Social Scheduler': { tasks: 67, success: 65, errors: 2 },
+        'GMB Manager': { tasks: 43, success: 43, errors: 0 },
+        'Competitor Watch': { tasks: 128, success: 128, errors: 0 },
+        'Email Automator': { tasks: 34, success: 33, errors: 1 },
+      })
+
+      const initialActivities: Activity[] = []
+      const moduleKeys = ['seo', 'rank', 'backlink', 'content', 'social', 'gmb', 'competitor', 'email'] as const
+      for (let i = 0; i < 15; i++) {
+        const moduleKey = getRandomItem(moduleKeys)
+        const template = getRandomItem(activityTemplates[moduleKey])
+        initialActivities.push({
+          id: generateId(),
+          module: moduleKey,
+          action: template.action,
+          status: Math.random() > 0.1 ? 'success' : Math.random() > 0.5 ? 'warning' : 'error',
+          timestamp: Date.now() - i * 3000,
+          details: template.details,
         })
-        setCurrentFocus(focusMap[category] || 'System')
-        setCycleCount(prev => prev + 1)
-      }, Math.random() * 1500 + 1000)
-      return () => clearInterval(interval)
-    }, [effectiveIntegrations.join(',')])
-
-    useEffect(() => {
-      const interval = setInterval(() => {
-        setSystemStatus(generateSystemStatus())
-        setActiveModules(generateActiveModules())
-      }, 5000)
-      return () => clearInterval(interval)
+      }
+      setActivities(initialActivities)
     }, [])
 
     useEffect(() => {
-      logEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    }, [operationLog])
+      const interval = setInterval(() => {
+        setCycleCount(prev => prev + 1)
+        setApiCalls(prev => prev + Math.floor(Math.random() * 50) + 20)
+        setActiveUsers(Math.floor(Math.random() * 50) + 80)
 
-    const connectedServices = integrationList.filter((service) =>
-      enabledIntegrations.includes(service.id)
-    )
+        const moduleKeys = ['seo', 'rank', 'backlink', 'content', 'social', 'gmb', 'competitor', 'email'] as const
+        const numActivities = Math.floor(Math.random() * 3) + 2
+        for (let i = 0; i < numActivities; i++) {
+          const moduleKey = getRandomItem(moduleKeys)
+          const template = getRandomItem(activityTemplates[moduleKey])
+          const newActivity: Activity = {
+            id: generateId(),
+            module: moduleKey,
+            action: template.action,
+            status: Math.random() > 0.85 ? 'warning' : Math.random() > 0.95 ? 'error' : 'success',
+            timestamp: Date.now(),
+            details: template.details,
+          }
+          setActivities(prev => {
+            const next = [newActivity, ...prev]
+            if (next.length > 100) next.pop()
+            return next
+          })
+        }
+
+        if (Math.random() > 0.7) {
+          setKeywordData(prev => prev.map(kw => ({
+            ...kw,
+            position: Math.max(1, kw.position + (Math.random() > 0.5 ? -1 : 1)),
+            change: Math.floor(Math.random() * 5) - 2,
+            status: Math.random() > 0.6 ? 'improving' : Math.random() > 0.5 ? 'stable' : 'declining',
+          })))
+        }
+
+        setModuleStats(prev => {
+          const updated = { ...prev }
+          Object.keys(updated).forEach(key => {
+            updated[key] = {
+              tasks: updated[key].tasks + Math.floor(Math.random() * 5),
+              success: updated[key].success + Math.floor(Math.random() * 4),
+              errors: updated[key].errors + (Math.random() > 0.9 ? 1 : 0),
+            }
+          })
+          return updated
+        })
+
+        if (Math.random() > 0.8) {
+          setBacklinks(prev => {
+            const newLink: Backlink = {
+              domain: `newsite${Date.now()}.com`,
+              url: '/resources/coffee-guide',
+              da: Math.floor(Math.random() * 60) + 20,
+              status: 'new',
+              type: Math.random() > 0.3 ? 'dofollow' : 'nofollow',
+            }
+            return [newLink, ...prev.slice(0, 9)]
+          })
+        }
+      }, 1500)
+      return () => clearInterval(interval)
+    }, [])
+
+    const getModuleColor = (module: string) => {
+      const colors: Record<string, string> = { seo: 'cyan', rank: 'green', backlink: 'blue', content: 'purple', social: 'pink', gmb: 'red', competitor: 'orange', email: 'yellow' }
+      return colors[module] || 'gray'
+    }
+
+    const colorClasses: Record<string, { bg: string; text: string; border: string }> = {
+      cyan: { bg: 'bg-cyan-500/20', text: 'text-cyan-400', border: 'border-cyan-500/30' },
+      green: { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/30' },
+      blue: { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30' },
+      purple: { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30' },
+      pink: { bg: 'bg-pink-500/20', text: 'text-pink-400', border: 'border-pink-500/30' },
+      red: { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30' },
+      orange: { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500/30' },
+      yellow: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/30' },
+      gray: { bg: 'bg-gray-500/20', text: 'text-gray-400', border: 'border-gray-500/30' },
+    }
 
     return (
       <div className="min-h-screen bg-[#030305] text-gray-300">
         <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-[#030305]/95 backdrop-blur-md">
-          <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 flex justify-between items-center gap-3">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-white rotate-45 transform" />
-              <span className="text-lg font-bold text-white tracking-widest tech-font">GROWTHAI</span>
-              <span className="hidden md:inline text-xs text-cyan-400 uppercase tracking-wider ml-2">Operations Active</span>
-            </div>
-            <div className="flex items-center gap-3 md:gap-6">
-              <div className="hidden sm:block text-xs text-gray-500 font-mono">
-                Cycle: <span className="text-cyan-400">{cycleCount.toLocaleString()}</span>
-              </div>
+          <div className="max-w-[1920px] mx-auto px-3 md:px-4 py-2 flex justify-between items-center">
+            <div className="flex items-center gap-2 md:gap-4">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-xs text-green-400">System Running</span>
+                <div className="w-8 h-8 bg-white rotate-45 transform" />
+                <span className="text-sm md:text-lg font-bold text-white tracking-widest tech-font">GROWTHAI</span>
               </div>
+              <div className="hidden md:block h-4 w-px bg-gray-700" />
+              <div className="hidden md:flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-xs text-green-400">All Systems Operational</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 md:gap-6 text-xs">
+              <div className="hidden md:flex items-center gap-4">
+                <div><span className="text-gray-500">API Calls:</span> <span className="text-cyan-400 font-mono">{apiCalls.toLocaleString()}</span></div>
+                <div><span className="text-gray-500">Cycles:</span> <span className="text-cyan-400 font-mono">{cycleCount.toLocaleString()}</span></div>
+                <div><span className="text-gray-500">Active:</span> <span className="text-green-400 font-mono">{activeUsers}</span></div>
+              </div>
+              <button className="px-3 md:px-4 py-1.5 bg-white text-black rounded font-bold text-xs uppercase tracking-wider hover:bg-cyan-400 transition">
+                Dashboard
+              </button>
             </div>
           </div>
         </nav>
 
-        <div className="pt-16 min-h-screen flex flex-col xl:flex-row">
-          <aside className="order-2 xl:order-1 w-full xl:w-64 border-t xl:border-t-0 xl:border-r border-white/5 p-4 flex-shrink-0 bg-[#040406] xl:bg-transparent">
-            <div className="mb-6">
-              <h3 className="text-xs uppercase tracking-widest text-gray-500 mb-3 tech-font">System Status</h3>
-              <div className="space-y-3">
-                {systemStatus.map((stat, i) => (
-                  <div key={i} className="flex justify-between items-center">
-                    <span className="text-xs text-gray-400">{stat.label}</span>
-                    <span className="text-xs text-cyan-400 font-mono">{stat.value} <span className="text-gray-500">{stat.unit}</span></span>
+        <div className="pt-12 xl:flex">
+          <aside className="xl:w-56 w-full border-b xl:border-b-0 xl:border-r border-white/5 p-3 flex-shrink-0">
+            <h3 className="text-[10px] uppercase tracking-widest text-gray-500 mb-2 tech-font">Active Modules</h3>
+            <div className="grid md:grid-cols-2 xl:grid-cols-1 gap-1">
+              {moduleSeed.map((mod, i) => {
+                const stats = moduleStats[mod.name] || { tasks: 0, success: 0, errors: 0 }
+                const color = colorClasses[mod.color]
+                return (
+                  <div key={i} className={`p-2 rounded ${color.bg} ${color.border} border`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`iconify ${color.text}`} data-icon={mod.icon} />
+                      <span className="text-xs text-white truncate">{mod.name}</span>
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full ml-auto animate-pulse" />
+                    </div>
+                    <div className="flex justify-between text-[10px] text-gray-500">
+                      <span>{stats.tasks} tasks</span>
+                      <span className="text-green-400">{stats.success}✓</span>
+                      {stats.errors > 0 && <span className="text-red-400">{stats.errors}✗</span>}
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <h3 className="text-xs uppercase tracking-widest text-gray-500 mb-3 tech-font">Active Modules</h3>
-              <div className="space-y-2">
-                {activeModules.map((module, i) => (
-                  <div key={i} className={`flex items-center gap-2 p-2 rounded-lg border transition ${currentFocus === module.name ? 'bg-cyan-500/10 border-cyan-500/40' : 'bg-white/5 border-white/5 hover:border-white/15'}`}>
-                    <span className={`iconify text-sm ${currentFocus === module.name ? 'text-cyan-400' : 'text-gray-500'}`} data-icon={module.icon} />
-                    <span className={`text-xs flex-1 ${currentFocus === module.name ? 'text-white' : 'text-gray-400'}`}>{module.name}</span>
-                    <span className="text-[10px] text-gray-600">{module.lastActivity}s</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-xs uppercase tracking-widest text-gray-500 mb-3 tech-font">Connected Services</h3>
-              <div className="space-y-1">
-                {connectedServices.length > 0 ? connectedServices.map((service, i) => (
-                  <div key={i} className="flex items-center gap-2 text-xs text-gray-400">
-                    <span className={`iconify ${service.color}`} data-icon={service.icon} />
-                    <span>{service.name}</span>
-                  </div>
-                )) : <div className="text-xs text-gray-500">No connected services selected.</div>}
-              </div>
+                )
+              })}
             </div>
           </aside>
 
-          <main className="order-1 xl:order-2 flex-1 flex flex-col min-h-[50vh] xl:min-h-0">
-            <div className="border-b border-white/5 p-3 md:p-4 bg-[#050507]">
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 bg-cyan-500 rounded-full animate-ping" />
-                <span className="text-xs uppercase tracking-widest text-gray-500 tech-font">Currently Processing</span>
-                <span className="text-sm text-white font-medium">{currentFocus}</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-3 md:p-4 border-b border-white/5 bg-[#040406]">
-              {[
-                { label: 'Agent State', value: 'Autonomous' },
-                { label: 'Primary Mode', value: 'Execution' },
-                { label: 'Queue Health', value: 'Stable' },
-                { label: 'Signal Feed', value: 'Live' },
-              ].map((item) => (
-                <div key={item.label} className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
-                  <div className="text-[10px] uppercase tracking-wider text-gray-500">{item.label}</div>
-                  <div className="text-xs md:text-sm text-cyan-300 tech-font mt-0.5">{item.value}</div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex-1 overflow-hidden relative h-[52vh] md:h-[60vh] xl:h-auto">
-              <div className="absolute inset-0 overflow-y-auto p-4 md:p-6 font-mono text-xs md:text-sm leading-relaxed">
-                {operationLog.map((log, i) => (
-                  <div key={i} className={`py-1 border-l-2 pl-4 mb-1 transition-all duration-300 ${
-                    i === operationLog.length - 1
-                      ? 'border-cyan-500 text-white bg-cyan-500/5'
-                      : i === operationLog.length - 2
-                      ? 'border-cyan-500/50 text-gray-300'
-                      : 'border-transparent text-gray-500'
-                  }`}>
-                    {log}
+          <main className="flex-1 flex flex-col overflow-hidden">
+            <div className="border-b border-white/5 p-3 bg-[#050507]">
+              <div className="flex items-center gap-3 overflow-x-auto">
+                {[
+                  { label: 'Avg Position', value: `#${(keywordData.reduce((a, b) => a + b.position, 0) / keywordData.length).toFixed(1)}`, color: 'green' },
+                  { label: 'Keywords Top 3', value: keywordData.filter(k => k.position <= 3).length, color: 'cyan' },
+                  { label: 'New Backlinks', value: backlinks.filter(b => b.status === 'new').length, color: 'blue' },
+                  { label: 'Avg Page Score', value: pages.length ? (pages.reduce((a, b) => a + b.score, 0) / pages.length).toFixed(0) : '0', color: 'orange' },
+                ].map((stat, i) => (
+                  <div key={i} className="flex-shrink-0 px-4 py-2 bg-white/5 rounded">
+                    <div className="text-[10px] text-gray-500 uppercase">{stat.label}</div>
+                    <div className={`${stat.color === 'green' ? 'text-green-400' : stat.color === 'cyan' ? 'text-cyan-400' : stat.color === 'blue' ? 'text-blue-400' : 'text-orange-400'} text-lg font-bold`}>
+                      {stat.value}
+                    </div>
                   </div>
                 ))}
-                <div ref={logEndRef} className="h-4" />
               </div>
-              <div className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent animate-scan" />
+            </div>
+
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-3 p-3 overflow-y-auto">
+              <div className="lg:col-span-2 bg-[#0a0a0a] rounded-lg border border-white/5 flex flex-col min-h-[320px]">
+                <div className="p-3 border-b border-white/5 flex items-center justify-between">
+                  <h3 className="text-xs uppercase tracking-widest text-gray-400 tech-font">Live Activity Stream</h3>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />Real-time
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto p-2 font-mono text-xs">
+                  {activities.slice(0, 30).map((activity, i) => {
+                    const color = colorClasses[getModuleColor(activity.module)]
+                    return (
+                      <div key={activity.id} className={`flex items-center gap-2 py-1.5 px-2 rounded mb-0.5 ${i === 0 ? 'bg-white/5' : ''}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${activity.status === 'success' ? 'bg-green-500' : activity.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'}`} />
+                        <span className={`${color.text} uppercase text-[10px] w-16`}>{activity.module}</span>
+                        <span className="text-gray-300 flex-1">{activity.action}</span>
+                        <span className="text-gray-500 text-[10px] hidden md:inline">{activity.details}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="bg-[#0a0a0a] rounded-lg border border-white/5 flex flex-col">
+                <div className="p-3 border-b border-white/5">
+                  <h3 className="text-xs uppercase tracking-widest text-gray-400 tech-font">Keyword Rankings</h3>
+                </div>
+                <div className="flex-1 overflow-y-auto p-2">
+                  {keywordData.slice(0, 8).map((kw, i) => (
+                    <div key={i} className="flex items-center gap-2 py-1.5 border-b border-white/5 last:border-0">
+                      <div className="w-6 text-center"><span className={`text-sm font-bold ${kw.position <= 3 ? 'text-green-400' : kw.position <= 10 ? 'text-cyan-400' : 'text-gray-400'}`}>#{kw.position}</span></div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs text-white truncate">{kw.term}</div>
+                        <div className="text-[10px] text-gray-500">{kw.volume} • {kw.difficulty}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-[#0a0a0a] rounded-lg border border-white/5 flex flex-col">
+                <div className="p-3 border-b border-white/5">
+                  <h3 className="text-xs uppercase tracking-widest text-gray-400 tech-font">Page Analysis</h3>
+                </div>
+                <div className="flex-1 overflow-y-auto p-2">
+                  {pages.map((page, i) => (
+                    <div key={i} className="flex items-center gap-2 py-2 border-b border-white/5 last:border-0">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs text-white truncate">{page.url}</div>
+                        <div className="text-[10px] text-gray-500">{page.title}</div>
+                      </div>
+                      <span className="text-xs text-gray-400">{page.score}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-[#0a0a0a] rounded-lg border border-white/5 flex flex-col">
+                <div className="p-3 border-b border-white/5">
+                  <h3 className="text-xs uppercase tracking-widest text-gray-400 tech-font">Backlink Monitor</h3>
+                </div>
+                <div className="flex-1 overflow-y-auto p-2">
+                  {backlinks.map((bl, i) => (
+                    <div key={i} className="flex items-center gap-2 py-1.5 border-b border-white/5 last:border-0">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs text-white truncate">{bl.domain}</div>
+                        <div className="text-[10px] text-gray-500 truncate">{bl.url}</div>
+                      </div>
+                      <div className="text-xs font-mono text-cyan-400">DA{bl.da}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-[#0a0a0a] rounded-lg border border-white/5 flex flex-col">
+                <div className="p-3 border-b border-white/5">
+                  <h3 className="text-xs uppercase tracking-widest text-gray-400 tech-font">Social Queue</h3>
+                </div>
+                <div className="flex-1 overflow-y-auto p-2">
+                  {socialQueue.map((post, i) => (
+                    <div key={i} className="flex items-center gap-2 py-1.5 border-b border-white/5 last:border-0">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs text-gray-300 truncate">{post.content}</div>
+                        <div className="text-[10px] text-gray-500">{post.scheduled}</div>
+                      </div>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-500/20 text-gray-400">{post.status}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-[#0a0a0a] rounded-lg border border-white/5 flex flex-col">
+                <div className="p-3 border-b border-white/5">
+                  <h3 className="text-xs uppercase tracking-widest text-gray-400 tech-font">GMB Updates</h3>
+                </div>
+                <div className="flex-1 overflow-y-auto p-2">
+                  {gmbUpdates.map((update, i) => (
+                    <div key={i} className="flex items-center gap-2 py-1.5 border-b border-white/5 last:border-0">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs text-gray-300">{update.type}</div>
+                        <div className="text-[10px] text-gray-500 truncate">{update.content}</div>
+                      </div>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-500/20 text-gray-400">{update.status}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </main>
-
-          <aside className="order-3 w-full xl:w-80 border-t xl:border-t-0 xl:border-l border-white/5 p-4 flex-shrink-0 bg-[#040406] xl:bg-transparent">
-            <div className="mb-6 p-4 bg-white/5 rounded-lg">
-              <h3 className="text-xs uppercase tracking-widest text-gray-500 mb-3 tech-font">Target Property</h3>
-              <div className="text-sm text-white mb-2">{formData.businessName || 'Demo Business'}</div>
-              <div className="text-xs text-gray-500">{formData.websiteUrl || 'https://example.com'}</div>
-              <div className="text-xs text-gray-600 mt-1">{formData.businessCategory || 'General'}</div>
-            </div>
-
-            <div className="mb-6">
-              <h3 className="text-xs uppercase tracking-widest text-gray-500 mb-3 tech-font">Parallel Threads</h3>
-              <div className="space-y-2">
-                {[
-                  { name: 'Primary Crawler', status: 'crawling' },
-                  { name: 'Content Processor', status: 'generating' },
-                  { name: 'Social Distributor', status: 'posting' },
-                  { name: 'Monitor Service', status: 'watching' },
-                ].map((thread, i) => (
-                  <div key={i} className="flex items-center gap-2 p-2 bg-white/5 rounded border border-white/10">
-                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                    <span className="text-xs text-gray-400 flex-1">{thread.name}</span>
-                    <span className="text-[10px] text-cyan-400 font-mono">{thread.status}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <h3 className="text-xs uppercase tracking-widest text-gray-500 mb-3 tech-font">Resource Allocation</h3>
-              <div className="space-y-3">
-                {[
-                  { label: 'Crawl Budget', value: 67 },
-                  { label: 'API Quota', value: 45 },
-                  { label: 'Queue Depth', value: 23 },
-                  { label: 'Memory', value: 34 },
-                ].map((resource, i) => (
-                  <div key={i}>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-gray-500">{resource.label}</span>
-                      <span className="text-gray-400">{resource.value}%</span>
-                    </div>
-                    <div className="h-1 bg-gray-800 rounded overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded transition-all duration-500" style={{ width: `${resource.value}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-xs uppercase tracking-widest text-gray-500 mb-3 tech-font">Observations</h3>
-              <div className="space-y-2 text-xs text-gray-500">
-                <div className="p-2 bg-white/5 rounded border border-cyan-500/30">Website structure mapped.</div>
-                <div className="p-2 bg-white/5 rounded border border-green-500/30">CMS detected: {formData.cmsType || 'Unknown'}.</div>
-                <div className="p-2 bg-white/5 rounded border border-blue-500/30">Sitemap available for processing.</div>
-                <div className="p-2 bg-white/5 rounded border border-purple-500/30">Integration pipelines initialized.</div>
-                <div className="p-2 bg-white/5 rounded border border-yellow-500/30">Priority channels active.</div>
-              </div>
-            </div>
-          </aside>
         </div>
-
-        <style jsx>{`
-          @keyframes scan {
-            0% { top: 0%; opacity: 0; }
-            5% { opacity: 1; }
-            95% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-          }
-          .animate-scan {
-            animation: scan 8s linear infinite;
-          }
-        `}</style>
       </div>
     )
   }
