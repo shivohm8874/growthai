@@ -1038,335 +1038,151 @@ export default function Home() {
   }
 
   const SimulationDashboard = () => {
-    const [activities, setActivities] = useState<Activity[]>([])
-    const [keywordData, setKeywordData] = useState<Keyword[]>(keywordSeed)
-    const [backlinks, setBacklinks] = useState<Backlink[]>([])
-    const [pages, setPages] = useState<SitePage[]>([])
-    const [socialQueue, setSocialQueue] = useState<SocialPost[]>([])
-    const [gmbUpdates, setGmbUpdates] = useState<GMBUpdate[]>([])
-    const [moduleStats, setModuleStats] = useState<Record<string, { tasks: number; success: number; errors: number }>>({})
-    const [cycleCount, setCycleCount] = useState(0)
-    const [activeUsers, setActiveUsers] = useState(0)
-    const [apiCalls, setApiCalls] = useState(0)
+    const [typedCode, setTypedCode] = useState('')
+    const [phaseIndex, setPhaseIndex] = useState(0)
+    const [previewLoading, setPreviewLoading] = useState(true)
+    const [previewErrored, setPreviewErrored] = useState(false)
+    const [previewKey, setPreviewKey] = useState(0)
+    const codeRef = useRef({ block: 0, char: 0 })
 
-    useEffect(() => {
-      setBacklinks([
-        { domain: 'coffeeblog.com', url: '/best-shops-2024', da: 45, status: 'active', type: 'dofollow' },
-        { domain: 'foodnetwork.com', url: '/local-favorites', da: 78, status: 'active', type: 'dofollow' },
-        { domain: 'yelp.com', url: '/biz/reviews', da: 92, status: 'active', type: 'nofollow' },
-        { domain: 'tripadvisor.com', url: '/restaurant-guide', da: 88, status: 'new', type: 'dofollow' },
-        { domain: 'old-blog.com', url: '/archived-post', da: 32, status: 'lost', type: 'dofollow' },
-      ])
+    const targetUrl =
+      formData.websiteUrl && formData.websiteUrl.startsWith('http')
+        ? formData.websiteUrl
+        : 'https://example.com'
 
-      setPages([
-        { url: '/', title: 'Homepage', issues: 2, score: 94, lastCrawled: '2m ago' },
-        { url: '/menu', title: 'Our Menu', issues: 5, score: 78, lastCrawled: '5m ago' },
-        { url: '/about', title: 'About Us', issues: 1, score: 89, lastCrawled: '8m ago' },
-        { url: '/products', title: 'Products', issues: 8, score: 65, lastCrawled: '12m ago' },
-        { url: '/contact', title: 'Contact', issues: 0, score: 96, lastCrawled: '15m ago' },
-      ])
+    const phases = [
+      'Reading target site structure',
+      'Generating SEO and content changes',
+      'Applying updates to runtime preview',
+      'Running validation and preparing release',
+    ]
 
-      setSocialQueue([
-        { platform: 'facebook', content: 'Start your morning right with our new...', scheduled: '2:30 PM', status: 'queued' },
-        { platform: 'instagram', content: 'Behind the scenes: How we roast our...', scheduled: '4:00 PM', status: 'queued' },
-        { platform: 'twitter', content: 'Flash sale! 20% off all cold brew...', scheduled: '12:00 PM', status: 'posting' },
-      ])
+    const plannedChanges = [
+      'Hero copy and CTA refreshed',
+      'Meta title and description updated',
+      'Navigation structure normalized',
+      'Page speed assets queued for optimization',
+      'Schema markup patch prepared',
+    ]
 
-      setGmbUpdates([
-        { type: 'Post', content: 'Weekly Special: Free pastry with...', status: 'synced' },
-        { type: 'Photo', content: 'Interior shot uploaded', status: 'syncing' },
-        { type: 'Hours', content: 'Updated holiday hours', status: 'pending' },
-      ])
-
-      setModuleStats({
-        'SEO Crawler': { tasks: 847, success: 831, errors: 16 },
-        'Rank Tracker': { tasks: 234, success: 234, errors: 0 },
-        'Backlink Monitor': { tasks: 156, success: 151, errors: 5 },
-        'Content Optimizer': { tasks: 89, success: 87, errors: 2 },
-        'Social Scheduler': { tasks: 67, success: 65, errors: 2 },
-        'GMB Manager': { tasks: 43, success: 43, errors: 0 },
-        'Competitor Watch': { tasks: 128, success: 128, errors: 0 },
-        'Email Automator': { tasks: 34, success: 33, errors: 1 },
-      })
-
-      const initialActivities: Activity[] = []
-      const moduleKeys = ['seo', 'rank', 'backlink', 'content', 'social', 'gmb', 'competitor', 'email'] as const
-      for (let i = 0; i < 15; i++) {
-        const moduleKey = getRandomItem(moduleKeys)
-        const template = getRandomItem(activityTemplates[moduleKey])
-        initialActivities.push({
-          id: generateId(),
-          module: moduleKey,
-          action: template.action,
-          status: Math.random() > 0.1 ? 'success' : Math.random() > 0.5 ? 'warning' : 'error',
-          timestamp: Date.now() - i * 3000,
-          details: template.details,
-        })
-      }
-      setActivities(initialActivities)
-    }, [])
+    const codeBlocks = [
+      `// Crawl target URL and extract structure\nconst pageMap = await crawler.scan("${targetUrl}")\nconst sections = extractor.getSections(pageMap)\n`,
+      `// Generate content and SEO patches\nconst patch = await agent.generatePatch({\n  goal: "increase qualified leads",\n  sections,\n  keywords: ["local seo", "service pages", "conversion"]\n})\n`,
+      `// Apply patch to runtime preview\nawait preview.apply(patch)\nawait preview.validate({ lighthouse: true, links: true, schema: true })\n`,
+      `// Finalize session output\nreturn {\n  status: "ready",\n  updatedSections: patch.sections.length,\n  previewUrl: "${targetUrl}"\n}\n`,
+    ]
 
     useEffect(() => {
       const interval = setInterval(() => {
-        setCycleCount(prev => prev + 1)
-        setApiCalls(prev => prev + Math.floor(Math.random() * 50) + 20)
-        setActiveUsers(Math.floor(Math.random() * 50) + 80)
+        const block = codeBlocks[codeRef.current.block]
+        if (!block) return
 
-        const moduleKeys = ['seo', 'rank', 'backlink', 'content', 'social', 'gmb', 'competitor', 'email'] as const
-        const numActivities = Math.floor(Math.random() * 3) + 2
-        for (let i = 0; i < numActivities; i++) {
-          const moduleKey = getRandomItem(moduleKeys)
-          const template = getRandomItem(activityTemplates[moduleKey])
-          const newActivity: Activity = {
-            id: generateId(),
-            module: moduleKey,
-            action: template.action,
-            status: Math.random() > 0.85 ? 'warning' : Math.random() > 0.95 ? 'error' : 'success',
-            timestamp: Date.now(),
-            details: template.details,
-          }
-          setActivities(prev => {
-            const next = [newActivity, ...prev]
-            if (next.length > 100) next.pop()
-            return next
-          })
+        if (codeRef.current.char < block.length) {
+          setTypedCode(prev => prev + block[codeRef.current.char])
+          codeRef.current.char += 1
+        } else if (codeRef.current.block < codeBlocks.length - 1) {
+          setTypedCode(prev => prev + '\n')
+          codeRef.current.block += 1
+          codeRef.current.char = 0
+          setPhaseIndex(prev => Math.min(prev + 1, phases.length - 1))
+          setPreviewLoading(true)
+          setPreviewErrored(false)
+          setPreviewKey(prev => prev + 1)
+        } else {
+          clearInterval(interval)
         }
+      }, 18)
 
-        if (Math.random() > 0.7) {
-          setKeywordData(prev => prev.map(kw => ({
-            ...kw,
-            position: Math.max(1, kw.position + (Math.random() > 0.5 ? -1 : 1)),
-            change: Math.floor(Math.random() * 5) - 2,
-            status: Math.random() > 0.6 ? 'improving' : Math.random() > 0.5 ? 'stable' : 'declining',
-          })))
-        }
-
-        setModuleStats(prev => {
-          const updated = { ...prev }
-          Object.keys(updated).forEach(key => {
-            updated[key] = {
-              tasks: updated[key].tasks + Math.floor(Math.random() * 5),
-              success: updated[key].success + Math.floor(Math.random() * 4),
-              errors: updated[key].errors + (Math.random() > 0.9 ? 1 : 0),
-            }
-          })
-          return updated
-        })
-
-        if (Math.random() > 0.8) {
-          setBacklinks(prev => {
-            const newLink: Backlink = {
-              domain: `newsite${Date.now()}.com`,
-              url: '/resources/coffee-guide',
-              da: Math.floor(Math.random() * 60) + 20,
-              status: 'new',
-              type: Math.random() > 0.3 ? 'dofollow' : 'nofollow',
-            }
-            return [newLink, ...prev.slice(0, 9)]
-          })
-        }
-      }, 1500)
       return () => clearInterval(interval)
     }, [])
 
-    const getModuleColor = (module: string) => {
-      const colors: Record<string, string> = { seo: 'cyan', rank: 'green', backlink: 'blue', content: 'purple', social: 'pink', gmb: 'red', competitor: 'orange', email: 'yellow' }
-      return colors[module] || 'gray'
-    }
-
-    const colorClasses: Record<string, { bg: string; text: string; border: string }> = {
-      cyan: { bg: 'bg-cyan-500/20', text: 'text-cyan-400', border: 'border-cyan-500/30' },
-      green: { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/30' },
-      blue: { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30' },
-      purple: { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30' },
-      pink: { bg: 'bg-pink-500/20', text: 'text-pink-400', border: 'border-pink-500/30' },
-      red: { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30' },
-      orange: { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500/30' },
-      yellow: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/30' },
-      gray: { bg: 'bg-gray-500/20', text: 'text-gray-400', border: 'border-gray-500/30' },
-    }
+    const activeChanges = plannedChanges.map((item, idx) => ({
+      item,
+      done: idx <= phaseIndex,
+    }))
 
     return (
       <div className="min-h-screen bg-[#030305] text-gray-300">
         <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-[#030305]/95 backdrop-blur-md">
-          <div className="max-w-[1920px] mx-auto px-3 md:px-4 py-2 flex justify-between items-center">
-            <div className="flex items-center gap-2 md:gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-white rotate-45 transform" />
-                <span className="text-sm md:text-lg font-bold text-white tracking-widest tech-font">GROWTHAI</span>
-              </div>
-              <div className="hidden md:block h-4 w-px bg-gray-700" />
-              <div className="hidden md:flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-xs text-green-400">All Systems Operational</span>
-              </div>
+          <div className="max-w-[1800px] mx-auto px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 bg-white rotate-45 transform" />
+              <span className="text-sm md:text-lg text-white tech-font tracking-widest">GROWTHAI AGENT WORKSPACE</span>
             </div>
-            <div className="flex items-center gap-3 md:gap-6 text-xs">
-              <div className="hidden md:flex items-center gap-4">
-                <div><span className="text-gray-500">API Calls:</span> <span className="text-cyan-400 font-mono">{apiCalls.toLocaleString()}</span></div>
-                <div><span className="text-gray-500">Cycles:</span> <span className="text-cyan-400 font-mono">{cycleCount.toLocaleString()}</span></div>
-                <div><span className="text-gray-500">Active:</span> <span className="text-green-400 font-mono">{activeUsers}</span></div>
-              </div>
-              <button className="px-3 md:px-4 py-1.5 bg-white text-black rounded font-bold text-xs uppercase tracking-wider hover:bg-cyan-400 transition">
-                Dashboard
-              </button>
+            <div className="hidden md:block text-xs text-cyan-400 tech-font uppercase tracking-wider">
+              {phases[phaseIndex]}
             </div>
           </div>
         </nav>
 
-        <div className="pt-12 xl:flex">
-          <aside className="xl:w-56 w-full border-b xl:border-b-0 xl:border-r border-white/5 p-3 flex-shrink-0">
-            <h3 className="text-[10px] uppercase tracking-widest text-gray-500 mb-2 tech-font">Active Modules</h3>
-            <div className="grid md:grid-cols-2 xl:grid-cols-1 gap-1">
-              {moduleSeed.map((mod, i) => {
-                const stats = moduleStats[mod.name] || { tasks: 0, success: 0, errors: 0 }
-                const color = colorClasses[mod.color]
-                return (
-                  <div key={i} className={`p-2 rounded ${color.bg} ${color.border} border`}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`iconify ${color.text}`} data-icon={mod.icon} />
-                      <span className="text-xs text-white truncate">{mod.name}</span>
-                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full ml-auto animate-pulse" />
+        <div className="pt-16 px-3 md:px-4 pb-4">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 h-[calc(100vh-80px)]">
+            <section className="rounded-xl border border-white/10 bg-[#09090b] overflow-hidden flex flex-col min-h-[360px]">
+              <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
+                <h3 className="text-xs uppercase tracking-widest text-gray-400 tech-font">Agent Output</h3>
+                <span className="text-[10px] text-green-400 font-mono">streaming</span>
+              </div>
+              <div className="flex-1 overflow-auto p-4 font-mono text-xs md:text-sm leading-6">
+                <pre className="whitespace-pre-wrap text-gray-200">{typedCode}</pre>
+              </div>
+            </section>
+
+            <section className="rounded-xl border border-white/10 bg-[#09090b] overflow-hidden flex flex-col min-h-[360px]">
+              <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
+                <h3 className="text-xs uppercase tracking-widest text-gray-400 tech-font">Live Preview</h3>
+                <span className="text-[10px] text-cyan-400 font-mono truncate max-w-[55%]">{targetUrl}</span>
+              </div>
+
+              <div className="px-4 py-3 border-b border-white/10 space-y-2">
+                <div className="h-1.5 bg-white/10 rounded overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-700"
+                    style={{ width: `${((phaseIndex + 1) / phases.length) * 100}%` }}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {activeChanges.map((change) => (
+                    <div key={change.item} className="flex items-center gap-2 text-xs">
+                      <span className={`w-1.5 h-1.5 rounded-full ${change.done ? 'bg-green-400' : 'bg-gray-600'}`} />
+                      <span className={change.done ? 'text-gray-200' : 'text-gray-500'}>{change.item}</span>
                     </div>
-                    <div className="flex justify-between text-[10px] text-gray-500">
-                      <span>{stats.tasks} tasks</span>
-                      <span className="text-green-400">{stats.success}✓</span>
-                      {stats.errors > 0 && <span className="text-red-400">{stats.errors}✗</span>}
+                  ))}
+                </div>
+              </div>
+
+              <div className="relative flex-1 bg-black">
+                {previewLoading && (
+                  <div className="absolute inset-0 z-10 bg-black/70 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                      <div className="text-xs text-cyan-300">Applying changes to preview...</div>
                     </div>
                   </div>
-                )
-              })}
-            </div>
-          </aside>
+                )}
 
-          <main className="flex-1 flex flex-col overflow-hidden">
-            <div className="border-b border-white/5 p-3 bg-[#050507]">
-              <div className="flex items-center gap-3 overflow-x-auto">
-                {[
-                  { label: 'Avg Position', value: `#${(keywordData.reduce((a, b) => a + b.position, 0) / keywordData.length).toFixed(1)}`, color: 'green' },
-                  { label: 'Keywords Top 3', value: keywordData.filter(k => k.position <= 3).length, color: 'cyan' },
-                  { label: 'New Backlinks', value: backlinks.filter(b => b.status === 'new').length, color: 'blue' },
-                  { label: 'Avg Page Score', value: pages.length ? (pages.reduce((a, b) => a + b.score, 0) / pages.length).toFixed(0) : '0', color: 'orange' },
-                ].map((stat, i) => (
-                  <div key={i} className="flex-shrink-0 px-4 py-2 bg-white/5 rounded">
-                    <div className="text-[10px] text-gray-500 uppercase">{stat.label}</div>
-                    <div className={`${stat.color === 'green' ? 'text-green-400' : stat.color === 'cyan' ? 'text-cyan-400' : stat.color === 'blue' ? 'text-blue-400' : 'text-orange-400'} text-lg font-bold`}>
-                      {stat.value}
+                {previewErrored ? (
+                  <div className="absolute inset-0 flex items-center justify-center text-center p-6">
+                    <div>
+                      <div className="text-sm text-red-400 mb-2">Preview blocked by target site headers</div>
+                      <div className="text-xs text-gray-500">Some websites do not allow iframe rendering. Agent pipeline is still running.</div>
                     </div>
                   </div>
-                ))}
+                ) : (
+                  <iframe
+                    key={previewKey}
+                    src={targetUrl}
+                    className="w-full h-full"
+                    onLoad={() => setPreviewLoading(false)}
+                    onError={() => {
+                      setPreviewLoading(false)
+                      setPreviewErrored(true)
+                    }}
+                    title="Live Site Preview"
+                  />
+                )}
               </div>
-            </div>
-
-            <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-3 p-3 overflow-y-auto">
-              <div className="lg:col-span-2 bg-[#0a0a0a] rounded-lg border border-white/5 flex flex-col min-h-[320px]">
-                <div className="p-3 border-b border-white/5 flex items-center justify-between">
-                  <h3 className="text-xs uppercase tracking-widest text-gray-400 tech-font">Live Activity Stream</h3>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />Real-time
-                  </div>
-                </div>
-                <div className="flex-1 overflow-y-auto p-2 font-mono text-xs">
-                  {activities.slice(0, 30).map((activity, i) => {
-                    const color = colorClasses[getModuleColor(activity.module)]
-                    return (
-                      <div key={activity.id} className={`flex items-center gap-2 py-1.5 px-2 rounded mb-0.5 ${i === 0 ? 'bg-white/5' : ''}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${activity.status === 'success' ? 'bg-green-500' : activity.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'}`} />
-                        <span className={`${color.text} uppercase text-[10px] w-16`}>{activity.module}</span>
-                        <span className="text-gray-300 flex-1">{activity.action}</span>
-                        <span className="text-gray-500 text-[10px] hidden md:inline">{activity.details}</span>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-
-              <div className="bg-[#0a0a0a] rounded-lg border border-white/5 flex flex-col">
-                <div className="p-3 border-b border-white/5">
-                  <h3 className="text-xs uppercase tracking-widest text-gray-400 tech-font">Keyword Rankings</h3>
-                </div>
-                <div className="flex-1 overflow-y-auto p-2">
-                  {keywordData.slice(0, 8).map((kw, i) => (
-                    <div key={i} className="flex items-center gap-2 py-1.5 border-b border-white/5 last:border-0">
-                      <div className="w-6 text-center"><span className={`text-sm font-bold ${kw.position <= 3 ? 'text-green-400' : kw.position <= 10 ? 'text-cyan-400' : 'text-gray-400'}`}>#{kw.position}</span></div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs text-white truncate">{kw.term}</div>
-                        <div className="text-[10px] text-gray-500">{kw.volume} • {kw.difficulty}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-[#0a0a0a] rounded-lg border border-white/5 flex flex-col">
-                <div className="p-3 border-b border-white/5">
-                  <h3 className="text-xs uppercase tracking-widest text-gray-400 tech-font">Page Analysis</h3>
-                </div>
-                <div className="flex-1 overflow-y-auto p-2">
-                  {pages.map((page, i) => (
-                    <div key={i} className="flex items-center gap-2 py-2 border-b border-white/5 last:border-0">
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs text-white truncate">{page.url}</div>
-                        <div className="text-[10px] text-gray-500">{page.title}</div>
-                      </div>
-                      <span className="text-xs text-gray-400">{page.score}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-[#0a0a0a] rounded-lg border border-white/5 flex flex-col">
-                <div className="p-3 border-b border-white/5">
-                  <h3 className="text-xs uppercase tracking-widest text-gray-400 tech-font">Backlink Monitor</h3>
-                </div>
-                <div className="flex-1 overflow-y-auto p-2">
-                  {backlinks.map((bl, i) => (
-                    <div key={i} className="flex items-center gap-2 py-1.5 border-b border-white/5 last:border-0">
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs text-white truncate">{bl.domain}</div>
-                        <div className="text-[10px] text-gray-500 truncate">{bl.url}</div>
-                      </div>
-                      <div className="text-xs font-mono text-cyan-400">DA{bl.da}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-[#0a0a0a] rounded-lg border border-white/5 flex flex-col">
-                <div className="p-3 border-b border-white/5">
-                  <h3 className="text-xs uppercase tracking-widest text-gray-400 tech-font">Social Queue</h3>
-                </div>
-                <div className="flex-1 overflow-y-auto p-2">
-                  {socialQueue.map((post, i) => (
-                    <div key={i} className="flex items-center gap-2 py-1.5 border-b border-white/5 last:border-0">
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs text-gray-300 truncate">{post.content}</div>
-                        <div className="text-[10px] text-gray-500">{post.scheduled}</div>
-                      </div>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-500/20 text-gray-400">{post.status}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-[#0a0a0a] rounded-lg border border-white/5 flex flex-col">
-                <div className="p-3 border-b border-white/5">
-                  <h3 className="text-xs uppercase tracking-widest text-gray-400 tech-font">GMB Updates</h3>
-                </div>
-                <div className="flex-1 overflow-y-auto p-2">
-                  {gmbUpdates.map((update, i) => (
-                    <div key={i} className="flex items-center gap-2 py-1.5 border-b border-white/5 last:border-0">
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs text-gray-300">{update.type}</div>
-                        <div className="text-[10px] text-gray-500 truncate">{update.content}</div>
-                      </div>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-500/20 text-gray-400">{update.status}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </main>
+            </section>
+          </div>
         </div>
       </div>
     )
@@ -1438,3 +1254,4 @@ export default function Home() {
     </>
   )
 }
+
